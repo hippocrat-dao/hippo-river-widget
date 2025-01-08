@@ -8,12 +8,12 @@ import { ethToEthermint, ethermintToEth } from '../lib/utils/format';
 // const endpoint = 'https://api.uni.junonetwork.io'
 
 interface Config {
-    sender: string,
+    sender: string;
     endpoint: string;
     chainId: string;
     hdPath: string;
-    chainName: string
-    params: string
+    chainName: string;
+    params: string;
 }
 
 // @ts-ignore
@@ -25,12 +25,13 @@ const EVMOS: Config = {
     chainName: 'evmos',
     params: JSON.stringify({
         proposal_id: '1',
-        validator_address: "evmosvaloper1tdss4m3x7jy9mlepm2dwy8820l7uv6m2vx6z88",
+        validator_address:
+            'evmosvaloper1tdss4m3x7jy9mlepm2dwy8820l7uv6m2vx6z88',
         chain_name: 'evmos',
         contract: 'add',
-        fees: { amount: '6000000000000000', denom: '', },
-    })
-}
+        fees: { amount: '6000000000000000', denom: '' },
+    }),
+};
 
 // @ts-ignore
 const JUNO: Config = {
@@ -41,12 +42,12 @@ const JUNO: Config = {
     chainName: 'juno',
     params: JSON.stringify({
         proposal_id: '1',
-        validator_address: "junovaloper1jxv0u20scum4trha72c7ltfgfqef6nscm9pmg2",
+        validator_address: 'junovaloper1jxv0u20scum4trha72c7ltfgfqef6nscm9pmg2',
         chain_name: 'juno',
         contract: 'junovaloper1jxv0u20scum4trha72c7ltfgfqef6nscm9pmg2',
-        fees: {amount: '2000', denom: ''}
-    })
-}
+        fees: { amount: '2000', denom: '' },
+    }),
+};
 
 // @ts-ignore
 const NEUTRON: Config = {
@@ -57,10 +58,11 @@ const NEUTRON: Config = {
     chainName: 'neutron',
     params: JSON.stringify({
         chain_name: 'neutron',
-        contract: 'neutron198sxsrjvt2v2lln2ajn82ks76k97mj72mtgl7309jehd0vy8rezs7e6c56',
-        fees: {amount: '2000', denom: ''}
-    })
-}
+        contract:
+            'neutron198sxsrjvt2v2lln2ajn82ks76k97mj72mtgl7309jehd0vy8rezs7e6c56',
+        fees: { amount: '2000', denom: '' },
+    }),
+};
 
 // @ts-ignore
 const COSMOS: Config = {
@@ -71,12 +73,13 @@ const COSMOS: Config = {
     chainName: 'cosmos',
     params: JSON.stringify({
         proposal_id: '1',
-        validator_address: "cosmosvaloper1jxv0u20scum4trha72c7ltfgfqef6nsch7q6cu",
+        validator_address:
+            'cosmosvaloper1jxv0u20scum4trha72c7ltfgfqef6nsch7q6cu',
         chain_name: 'cosmos',
         contract: 'junovaloper1jxv0u20scum4trha72c7ltfgfqef6nscm9pmg2',
-        fees: {amount: '6000', denom: ''}
-    })
-}
+        fees: { amount: '6000', denom: '' },
+    }),
+};
 
 // @ts-ignore
 const Archway: Config = {
@@ -87,10 +90,11 @@ const Archway: Config = {
     chainName: 'archway',
     params: JSON.stringify({
         chain_name: 'archway',
-        contract: 'archway1tc7k4683zqn8krm3vq7ed5jd4l23c2h9kyswc75zpc8aeln6smqsz79j44',
-        fees: {amount: '2000', denom: ''}
-    })
-}
+        contract:
+            'archway1tc7k4683zqn8krm3vq7ed5jd4l23c2h9kyswc75zpc8aeln6smqsz79j44',
+        fees: { amount: '2000', denom: '' },
+    }),
+};
 
 // @ts-ignore
 const btc: Config = {
@@ -106,11 +110,19 @@ const btc: Config = {
         // chain_name: 'evmos',
         // contract: 'add',
         // fees: {amount: '6000000000000000', denom: ''}
-    })
-}
+    }),
+};
 
+const HIPPO: Config = {
+    sender: 'hippo1vl04c8yck872q8fye2stf5wpeem07n8sr84z3y', //change to your address
+    endpoint: 'https://api.testnet.hippo-protocol.com/',
+    chainId: 'hippo-1',
+    hdPath: "m/44'/0/0'/0/0",
+    params: JSON.stringify({}), //change when needed(vote, ...)
+    chainName: 'hippo-protocol',
+};
 
-const conf = ref(JUNO)
+const conf = ref(HIPPO);
 // const conf = ref(btc)
 
 const types = [
@@ -149,13 +161,14 @@ onMounted(() => {
     document.documentElement.setAttribute('data-theme', 'light');
 });
 const walletStateChange = (res: any) => {
-   console.log(res, 'resres');
+    console.log(res, 'resres');
 };
 
-console.log("0x88BFec573Dd3E4b7d2E6BfD4D0D6B11F843F8aa1")
-console.log(ethToEthermint("0x88BFec573Dd3E4b7d2E6BfD4D0D6B11F843F8aa1", "evmos"))
-console.log(ethermintToEth("evmos13zl7c4ea60jt05hxhl2dp443r7zrlz4plc5m8z"))
-
+console.log('0x88BFec573Dd3E4b7d2E6BfD4D0D6B11F843F8aa1');
+console.log(
+    ethToEthermint('0x88BFec573Dd3E4b7d2E6BfD4D0D6B11F843F8aa1', 'evmos')
+);
+console.log(ethermintToEth('evmos13zl7c4ea60jt05hxhl2dp443r7zrlz4plc5m8z'));
 </script>
 
 <template>
