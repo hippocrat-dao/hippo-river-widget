@@ -1,6 +1,5 @@
 {
     "name": "ping-widget",
-    "private": false,
     "version": "0.3.8",
     "type": "module",
     "main": "dist/ping-widget.js",
@@ -33,7 +32,6 @@
         "trypublish": "npm publish || true"
     },
     "dependencies": {
-        "cosmjs-types": "0.9.0",
         "@cosmjs/amino": "^0.32.3",
         "@cosmjs/cosmwasm-stargate": "^0.32.3",
         "@cosmjs/ledger-amino": "^0.32.3",
@@ -48,6 +46,7 @@
         "@ping-pub/chain-registry-client": "^0.0.25",
         "@types/bignumber.js": "^5.0.0",
         "buffer": "^6.0.3",
+        "cosmjs-types": "0.9.0",
         "cross-fetch": "^3.1.5",
         "daisyui": "^3.1.0",
         "dayjs": "^1.11.7",
@@ -80,5 +79,6 @@
         "vite": "^4.3.2",
         "vite-plugin-css-injected-by-js": "^3.1.0",
         "vue-tsc": "^1.4.2"
-    }
+    },
+    "packageManager": "yarn@1.22.1"
 }

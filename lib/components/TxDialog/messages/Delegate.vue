@@ -25,7 +25,7 @@ const inactiveValidators = ref([]);
 const stakingDenom = ref('');
 const unbondingTime = ref('');
 const amount = ref('');
-const amountDenom = ref('');
+const amountDenom = ref('hp');
 
 const msgs = computed(() => {
     const convert = new TokenUnitConverter(props.metadata);
@@ -56,7 +56,30 @@ const list: ComputedRef<
 });
 
 const available = computed(() => {
-    const convert = new TokenUnitConverter(props.metadata);
+    const convert = new TokenUnitConverter(
+        // below can be simplied to props.metadata if metadata api works.
+        {
+            ahp: {
+                name: 'hp',
+                description: 'The native staking token of the Hippo Protocol.',
+                denom_units: [
+                    {
+                        denom: 'ahp',
+                        exponent: 0,
+                        aliases: [],
+                    },
+                    {
+                        denom: 'hp',
+                        exponent: 18,
+                        aliases: [],
+                    },
+                ],
+                base: 'ahp',
+                display: 'hp',
+                symbol: 'hp',
+            },
+        }
+    );
     const base = props.balances?.find(
         (x) => x.denom === stakingDenom.value
     ) || { amount: '0', denom: stakingDenom.value };
@@ -73,15 +96,7 @@ function loadInactiveValidators() {
 }
 
 const units = computed(() => {
-    if (!props.metadata || !props.metadata[stakingDenom.value]) {
-        amountDenom.value = stakingDenom.value;
-        return [{ denom: stakingDenom.value, exponent: 0, aliases: [] }];
-    }
-    const list = props.metadata[stakingDenom.value].denom_units.sort(
-        (a, b) => b.exponent - a.exponent
-    );
-    if (list.length > 0) amountDenom.value = list[0].denom;
-    return list;
+    return [{ denom: 'hp', exponent: 18, aliases: [] }];
 });
 
 const isValid = computed(() => {
@@ -106,7 +121,7 @@ function initial() {
     activeValidators.value = [];
     validator.value = params.value.validator_address;
     getStakingParam(props.endpoint).then((x) => {
-        stakingDenom.value = x.params.bond_denom;
+        stakingDenom.value = x.params.bond_denom; // ahp
         unbondingTime.value = x.params.unbonding_time;
     });
 
@@ -141,7 +156,10 @@ defineExpose({ msgs, isValid, initial });
                     >Show Inactive</a
                 >
             </label>
-            <select v-model="validator" class="select select-bordered dark:text-white">
+            <select
+                v-model="validator"
+                class="select select-bordered dark:text-white"
+            >
                 <option value="">Select a validator</option>
                 <option v-for="v in list" :value="v.operator_address">
                     {{ v.description.moniker }} ({{
@@ -154,8 +172,9 @@ defineExpose({ msgs, isValid, initial });
         <div class="form-control">
             <label class="label">
                 <span class="label-text">Amount</span>
-                <span> 
-                    {{ available?.display.amount }} {{ available?.display.denom }}
+                <span>
+                    {{ available?.display.amount }}
+                    {{ available?.display.denom }}
                 </span>
             </label>
             <label class="join">
@@ -165,7 +184,10 @@ defineExpose({ msgs, isValid, initial });
                     :placeholder="`Available: ${available?.display.amount}`"
                     class="input border border-gray-300 dark:border-gray-600 w-full join-item dark:text-white"
                 />
-                <select v-model="amountDenom" class="select select-bordered join-item dark:text-white">
+                <select
+                    v-model="amountDenom"
+                    class="select select-bordered join-item dark:text-white"
+                >
                     <option v-for="u in units">{{ u.denom }}</option>
                 </select>
             </label>
