@@ -27,8 +27,32 @@ const unbondingTime = ref('');
 const amount = ref('');
 const amountDenom = ref('hp');
 
+const convert = new TokenUnitConverter(
+        // below can be simplied to props.metadata if metadata api works.
+        {
+            ahp: {
+                name: 'hp',
+                description: 'The native staking token of the Hippo Protocol.',
+                denom_units: [
+                    {
+                        denom: 'ahp',
+                        exponent: 0,
+                        aliases: [],
+                    },
+                    {
+                        denom: 'hp',
+                        exponent: 18,
+                        aliases: [],
+                    },
+                ],
+                base: 'ahp',
+                display: 'hp',
+                symbol: 'hp',
+            },
+        }
+    );
+
 const msgs = computed(() => {
-    const convert = new TokenUnitConverter(props.metadata);
     return [
         {
             typeUrl: '/cosmos.staking.v1beta1.MsgDelegate',
@@ -56,30 +80,7 @@ const list: ComputedRef<
 });
 
 const available = computed(() => {
-    const convert = new TokenUnitConverter(
-        // below can be simplied to props.metadata if metadata api works.
-        {
-            ahp: {
-                name: 'hp',
-                description: 'The native staking token of the Hippo Protocol.',
-                denom_units: [
-                    {
-                        denom: 'ahp',
-                        exponent: 0,
-                        aliases: [],
-                    },
-                    {
-                        denom: 'hp',
-                        exponent: 18,
-                        aliases: [],
-                    },
-                ],
-                base: 'ahp',
-                display: 'hp',
-                symbol: 'hp',
-            },
-        }
-    );
+   
     const base = props.balances?.find(
         (x) => x.denom === stakingDenom.value
     ) || { amount: '0', denom: stakingDenom.value };

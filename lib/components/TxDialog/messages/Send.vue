@@ -16,10 +16,33 @@ const props = defineProps({
 const amount = ref('');
 const recipient = ref('');
 const denom = ref('');
-const amountDenom = ref('')
+const amountDenom = ref('hp')
+const convert = new TokenUnitConverter(
+        // below can be simplied to props.metadata if metadata api works.
+        {
+            ahp: {
+                name: 'hp',
+                description: 'The native staking token of the Hippo Protocol.',
+                denom_units: [
+                    {
+                        denom: 'ahp',
+                        exponent: 0,
+                        aliases: [],
+                    },
+                    {
+                        denom: 'hp',
+                        exponent: 18,
+                        aliases: [],
+                    },
+                ],
+                base: 'ahp',
+                display: 'hp',
+                symbol: 'hp',
+            },
+        }
+    );
 
 const msgs = computed(() => {
-    const convert = new TokenUnitConverter(props.metadata)
     return [
         {
             typeUrl: '/cosmos.bank.v1beta1.MsgSend',
@@ -44,7 +67,6 @@ const available = computed(() => {
             denom: '-',
         }
     )
-    const convert = new TokenUnitConverter(props.metadata)
     return {
         base,
         display: convert.baseToUnit(base, amountDenom.value)
@@ -52,7 +74,6 @@ const available = computed(() => {
 });
 
 const showBalances = computed(() => {
-    const convert = new TokenUnitConverter(props.metadata)
     return props.balances?.map(b => ({
         base: b,
         display: convert.baseToDisplay(b)
@@ -60,13 +81,7 @@ const showBalances = computed(() => {
 })
 
 const units = computed(() => {
-    if(!props.metadata || !props.metadata[denom.value]) {
-        amountDenom.value = denom.value
-        return [{denom: denom.value, exponent: 0, aliases: []}]
-    }
-    const list = props.metadata[denom.value].denom_units.sort((a, b) => b.exponent - a.exponent)
-    if(list.length > 0) amountDenom.value = list[0].denom
-    return list
+    return [{ denom: 'hp', exponent: 18, aliases: [] }];
 })
 
 const isValid = computed(() => {
@@ -85,7 +100,7 @@ const isValid = computed(() => {
 
 
 function initial() {
-    denom.value = props.params?.fees?.denom || '';
+    denom.value = 'ahp'
     // getStakingParam(props.endpoint).then((x) => {
     //     denom.value = x.params?.bond_denom;
     // });
