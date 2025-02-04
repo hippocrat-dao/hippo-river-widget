@@ -24,11 +24,14 @@ export class LedgerWallet implements AbstractWallet {
     registry: Registry
     aminoTypes = new AminoTypes({...createDefaultAminoConverters(), ...createWasmAminoConverters()})
     conf: WalletArgument
+    prefix: string
+
     constructor(arg: WalletArgument, registry: Registry) {
         this.transport = arg.transport || 'usb'
         this.hdPath = arg.hdPath || DEFAULT_HDPATH
         this.registry = registry
         this.conf = arg
+        this.prefix = arg.prefix || 'hippo'
     }
 
     async getSigner() {
@@ -53,7 +56,7 @@ export class LedgerWallet implements AbstractWallet {
             default:
         }
         // const path = stringToPath(this.hdPath)
-        return new LedgerSigner(transport, { ledgerAppName, hdPaths: [hdPath] })
+        return new LedgerSigner(transport, { ledgerAppName, hdPaths: [hdPath], prefix: this.prefix})
     }
 
     async getAccounts(): Promise<Account[]> {
