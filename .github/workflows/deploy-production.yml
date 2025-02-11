@@ -43,9 +43,15 @@ jobs:
 
             - name: S3 bucket update
               run: |
-                  aws s3 cp --recursive --region ap-northeast-2 ./dist "s3://$AWS_S3_BUCKET_NAME"
+                  aws s3 cp --recursive --region ap-northeast-2 ./dist "s3://$AWS_S3_BUCKET_NAME/widget"
               env:
                   AWS_S3_BUCKET_NAME: ${{ secrets.AWS_S3_BUCKET_NAME }}
+
+            - name: CloudFront cache update
+              run: |
+                  aws cloudfront create-invalidation --distribution-id "$AWS_CLOUDFRONT_DISTRIBUTION_ID" --paths "/*"
+              env:
+                  AWS_CLOUDFRONT_DISTRIBUTION_ID: ${{ secrets.AWS_CLOUDFRONT_DISTRIBUTION_ID }}
 
             - name: Slack notification
               uses: 8398a7/action-slack@v3
