@@ -63,6 +63,11 @@ export async function getAccount(endpoint: string, address: string) {
 
 }
 
+export async function getAccountInfo(endpoint: string, address: string) {
+    const url = `${endpoint}/cosmos/auth/v1beta1/account_info/${address}`
+    return get(url)
+}
+
 export async function getBalance(endpoint: string, address: string): Promise<{balances: Coin[]}> {
     const url = `${endpoint}/cosmos/bank/v1beta1/balances/${address}`
     return get(url)
