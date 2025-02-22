@@ -127,6 +127,7 @@ const conf = ref(HIPPO);
 
 const types = [
     'send',
+    'propose',
     'delegate',
     'vote',
     'redelegate',

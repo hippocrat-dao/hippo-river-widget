@@ -23,6 +23,7 @@ import Unbond from './messages/Unbond.vue';
 import Vote from './messages/Vote.vue';
 import Withdraw from './messages/Withdraw.vue';
 import WithdrawCommission from './messages/WithdrawCommission.vue';
+import Propose from './messages/Propose.vue';
 
 // wasm msgs
 import StoreCode from './wasm/StoreCode.vue';
@@ -46,6 +47,8 @@ const msgType = computed(() => {
     switch (props.type?.toLowerCase()) {
         case 'send':
             return Send;
+        case 'propose':
+            return Propose;
         case 'delegate':
             return Delegate;
         case 'withdraw':
