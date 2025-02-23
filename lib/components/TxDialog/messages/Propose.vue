@@ -16,10 +16,8 @@ const props = defineProps({
 const denom = ref("")
 const deposit = ref("")
 const amountDenom = ref("hp")
-const propose_metadata = ref("")
 const title = ref("")
 const summary = ref("")
-const messages = ref("{}")
 
 const convert = new TokenUnitConverter(
     // below can be simplied to props.metadata if metadata api works.
@@ -105,21 +103,6 @@ defineExpose({ msgs, isValid, initial })
             </label>
             <input :value="sender" type="text"
                 class="text-gray-600 dark:text-white input border !border-gray-300 dark:!border-gray-600" />
-        </div>
-
-        <div class="form-control">
-            <label class="label">
-                <span class="label-text">Messages</span>
-                <input v-model="messages" type="text"
-                    class="text-gray-600 dark:text-white input border !border-gray-300 dark:!border-gray-600" />
-            </label>
-        </div>
-        <div class="form-control">
-            <label class="label">
-                <span class="label-text">Metadata</span>
-                <input v-model="propose_metadata" type="text"
-                    class="text-gray-600 dark:text-white input border !border-gray-300 dark:!border-gray-600" />
-            </label>
         </div>
         <div class="form-control">
             <label class="label">
