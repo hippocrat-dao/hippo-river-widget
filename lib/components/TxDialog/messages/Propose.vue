@@ -2,6 +2,8 @@
 import { PropType, computed, ref } from 'vue';
 import { Coin, CoinMetadata } from '../../../utils/type';
 import { TokenUnitConverter } from '../../../utils/TokenUnitConverter';
+import { TextProposal } from 'cosmjs-types/cosmos/gov/v1beta1/gov';
+import { MsgSubmitProposal } from 'cosmjs-types/cosmos/gov/v1beta1/tx';
 
 const props = defineProps({
     endpoint: { type: String, required: true },
@@ -53,19 +55,24 @@ const available = computed(() => {
 })
 
 const msgs = computed(() => {
+    const content = TextProposal.fromPartial({
+        title: title.value,
+        description: summary.value,
+    });
+
+
     return [{
-        typeUrl: '/cosmos.gov.v1beta1.MsgSubmitProposal',
-        value: {
-            messages: messages.value,
-            initial_deposit: convert.displayToBase(denom.value, {
+        typeUrl: '/cosmos.gov.v1beta1.MsgSubmitProposal', value: MsgSubmitProposal.fromPartial({
+            content: {
+                typeUrl: "/cosmos.gov.v1beta1.TextProposal",
+                value: TextProposal.encode(content).finish(),
+            },
+            initialDeposit: [convert.displayToBase(denom.value, {
                 amount: String(deposit.value),
                 denom: amountDenom.value
-            }),
+            })],
             proposer: props.sender,
-            metadata: propose_metadata.value,
-            title: '',
-            summary: ''
-        },
+        })
     }]
 })
 

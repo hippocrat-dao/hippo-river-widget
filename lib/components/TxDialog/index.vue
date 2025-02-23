@@ -231,6 +231,7 @@ async function sendTx() {
             eventType: props.type,
         });
     } catch (e) {
+        console.error(e)
         sending.value = false;
         error.value = String(e);
     }
