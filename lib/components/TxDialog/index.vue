@@ -2,6 +2,7 @@
 import { ref, computed } from 'vue';
 import {
     getAccount,
+    getAccountInfo,
     getBalance,
     getBalanceMetadata,
     getIBCDenomMetadata,
@@ -110,7 +111,9 @@ async function initData() {
         metadatas.value = {}
         view.value = 'input';
         p.value = JSON.parse(props.params || '{}')
-        memo.value = props.type?.toLowerCase() === 'send' ? '' : 'ping.pub'
+        getAccountInfo(props.endpoint, props.sender).then(res=>{
+            memo.value = `did:hp:${res.info.pub_key.key}`
+        })
 
         feeAmount.value = Number(p.value?.fees?.amount || 2000)
         feeDenom.value = balance.value[0]?.denom;
