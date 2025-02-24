@@ -153,3 +153,8 @@ export async function estimateSwapAmountIn(endpoint: string, poolId: string, tok
     const url = `${endpoint}/osmosis/gamm/v1beta1/${poolId}/estimate/swap_exact_amount_in?token_in=${token.amount}${token.denom}`
     return get(url)
 }
+
+export async function getCommunityPool(endpoint: string) {
+    const url = `${endpoint}/cosmos/distribution/v1beta1/community_pool`
+    return get(url)
+}
