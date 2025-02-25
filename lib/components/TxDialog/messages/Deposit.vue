@@ -1,7 +1,6 @@
 <script lang="ts" setup>
-import { PropType, computed, onMounted, ref } from 'vue';
+import { PropType, computed, ref } from 'vue';
 import { Coin, CoinMetadata } from '../../../utils/type';
-import { getStakingParam } from '../../../utils/http';
 import { TokenUnitConverter } from '../../../utils/TokenUnitConverter';
 
 const props = defineProps({
@@ -15,10 +14,34 @@ const props = defineProps({
 const params = computed(() => JSON.parse(props.params || "{}"))
 const denom = ref("")
 const amount = ref("")
-const amountDenom = ref("")
+const amountDenom = ref("hp")
+
+const convert = new TokenUnitConverter(
+    // below can be simplied to props.metadata if metadata api works.
+    {
+        ahp: {
+            name: 'hp',
+            description: 'The native staking token of the Hippo Protocol.',
+            denom_units: [
+                {
+                    denom: 'ahp',
+                    exponent: 0,
+                    aliases: [],
+                },
+                {
+                    denom: 'hp',
+                    exponent: 18,
+                    aliases: [],
+                },
+            ],
+            base: 'ahp',
+            display: 'hp',
+            symbol: 'hp',
+        },
+    }
+);
 
 const available = computed(() => {
-    const convert = new TokenUnitConverter(props.metadata)
     const base = props.balances?.find(x => x.denom === denom.value) || { amount: "0", denom: denom.value }
     return {
         base,
@@ -27,7 +50,6 @@ const available = computed(() => {
 })
 
 const msgs = computed(() => {
-    const convert = new TokenUnitConverter(props.metadata)
     return [{
         typeUrl: '/cosmos.gov.v1beta1.MsgDeposit',
         value: {
@@ -42,13 +64,7 @@ const msgs = computed(() => {
 })
 
 const units = computed(() => {
-    if(!props.metadata || !props.metadata[denom.value]) {
-        amountDenom.value = denom.value
-        return [{denom: denom.value, exponent: 0, aliases: []}]
-    }
-    const list = props.metadata[denom.value].denom_units.sort((a, b) => b.exponent - a.exponent)
-    if(list.length > 0) amountDenom.value = list[0].denom
-    return list
+    return [{ denom: 'hp', exponent: 18, aliases: [] }];
 })
 
 const isValid = computed(() => {
@@ -66,9 +82,7 @@ const isValid = computed(() => {
 })
 
 function initial() {
-    getStakingParam(props.endpoint).then(x => {
-        denom.value = x.params.bond_denom
-    })
+    denom.value = 'ahp'
 }
 
 defineExpose({msgs, isValid, initial})
