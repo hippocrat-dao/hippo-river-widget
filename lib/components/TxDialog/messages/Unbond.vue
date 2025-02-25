@@ -14,11 +14,35 @@ const props = defineProps({
 const params = computed(() => JSON.parse(props.params || "{}"))
 const delegation = ref({} as {balance: Coin, delegation: {delegator_address: string, shares: string, validator_address: string}})
 const amount = ref("")
-const amountDenom = ref("")
+const amountDenom = ref("hp")
 const error = ref("")
 
+const convert = new TokenUnitConverter(
+    // below can be simplied to props.metadata if metadata api works.
+    {
+        ahp: {
+            name: 'hp',
+            description: 'The native staking token of the Hippo Protocol.',
+            denom_units: [
+                {
+                    denom: 'ahp',
+                    exponent: 0,
+                    aliases: [],
+                },
+                {
+                    denom: 'hp',
+                    exponent: 18,
+                    aliases: [],
+                },
+            ],
+            base: 'ahp',
+            display: 'hp',
+            symbol: 'hp',
+        },
+    }
+);
+
 const msgs = computed(() => {
-    const convert = new TokenUnitConverter(props.metadata)
     return [{
         typeUrl: '/cosmos.staking.v1beta1.MsgUndelegate',
         value: {
@@ -33,14 +57,7 @@ const msgs = computed(() => {
 })
 
 const units = computed(() => {
-    const denom = delegation.value.balance?.denom
-    if(!props.metadata || !props.metadata[denom]) {
-        amountDenom.value = denom
-        return [{denom: denom, exponent: 0, aliases: []}]
-    }
-    const list = props.metadata[denom].denom_units.sort((a, b) => b.exponent - a.exponent)
-    if(list.length > 0) amountDenom.value = list[0].denom
-    return list
+    return [{ denom: 'hp', exponent: 18, aliases: [] }];
 })
 
 const isValid = computed(() => {
