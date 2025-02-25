@@ -101,9 +101,6 @@ const isValid = computed(() => {
 
 function initial() {
     denom.value = 'ahp'
-    // getStakingParam(props.endpoint).then((x) => {
-    //     denom.value = x.params?.bond_denom;
-    // });
 }
 
 function formatDenom(v: any) {
