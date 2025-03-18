@@ -28,7 +28,7 @@ export class LedgerWallet implements AbstractWallet {
 
     constructor(arg: WalletArgument, registry: Registry) {
         this.transport = arg.transport || 'usb'
-        this.hdPath = arg.hdPath || DEFAULT_HDPATH
+        this.hdPath = "m/44'/118/0'/0/0"
         this.registry = registry
         this.conf = arg
         this.prefix = arg.prefix || 'hippo'
