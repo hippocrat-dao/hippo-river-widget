@@ -77,7 +77,13 @@ const walletList = computed(() => {
     return list;
 });
 
-const connected = ref(readWallet(props.hdPath) as ConnectedWallet);
+const hdPath=computed(()=>{
+    
+    return name.value===WalletName.Ledger?"m/44'/118/0'/0/0":"m/44'/0/0'/0/0"
+})
+
+const connected = ref(readWallet(hdPath.value) as ConnectedWallet);
+
 
 function selectWallet(wallet: WalletName) {
     name.value = wallet;
@@ -90,7 +96,7 @@ async function connect() {
     try {
         const wa = createWallet(name.value, {
             chainId: props.chainId,
-            hdPath: props.hdPath,
+            hdPath: hdPath.value,
             prefix: props.addrPrefix
         });
         await wa
@@ -102,9 +108,9 @@ async function connect() {
                     connected.value = {
                         wallet: name.value,
                         cosmosAddress: first.address,
-                        hdPath: props.hdPath
+                        hdPath: hdPath.value
                     };
-                    writeWallet(connected.value, props.hdPath);
+                    writeWallet(connected.value,hdPath.value);
                     emit('connect', {
                         value: connected.value
                     });
@@ -121,7 +127,7 @@ async function connect() {
 }
 
 function disconnect() {
-    removeWallet(props.hdPath);
+    removeWallet(hdPath.value);
     emit('disconnect', { value: connected.value });
     connected.value = {} as ConnectedWallet;
 }
