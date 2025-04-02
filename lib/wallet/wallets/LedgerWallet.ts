@@ -31,7 +31,7 @@ export class LedgerWallet implements AbstractWallet {
         this.hdPath = "m/44'/118/0'/0/0"
         this.registry = registry
         this.conf = arg
-        this.prefix = arg.prefix || 'hippo'
+        this.prefix = 'hippo'
     }
 
     async getSigner() {
@@ -165,7 +165,7 @@ export class LedgerWallet implements AbstractWallet {
         const accounts = await this.getAccounts()
         const {data} = fromBech32(tx.signerAddress)
         const hex = toHex(data)
-        const signerAddress = toBech32("cosmos", data)
+        const signerAddress = toBech32("hippo", data)
         const accountFromSigner = accounts.find((account) => toHex(fromBech32(account.address).data) === hex);
         if (!accountFromSigner) {
             throw new Error("Failed to retrieve account from signer");

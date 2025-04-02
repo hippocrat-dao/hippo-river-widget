@@ -114,7 +114,7 @@ const btc: Config = {
 };
 
 const HIPPO: Config = {
-    sender: 'hippo1vl04c8yck872q8fye2stf5wpeem07n8sr84z3y', //change to your address
+    sender:"hippo1nsulvrjntdy6rew86t2pdslkzawk37p5c82sq4", //change to your address
     endpoint: 'https://api.hippo-protocol.com',
     chainId: 'hippo-protocol-1',
     hdPath: "m/44'/0/0'/0/0",

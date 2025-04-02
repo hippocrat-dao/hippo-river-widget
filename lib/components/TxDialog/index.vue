@@ -110,6 +110,7 @@ const chainId = ref('cosmoshub-4');
 // const chainId = ref('taproot-1');
 const broadcast = ref(BroadcastMode.SYNC);
 
+
 async function initData() {
     if (open.value && props.endpoint && props.sender) {
         metadatas.value = {};
@@ -213,12 +214,12 @@ async function sendTx() {
             },
         };
         console.log('tx:', tx);
-        const current = readWallet(props.hdPath);
+        const current = readWallet();
         const wallet = current ? current.wallet : WalletName.Keplr;
+        
         const client = new UniClient(wallet, {
             chainId: chainId.value,
-            hdPath: current.hdPath,
-        });
+                   });
 
         if (!advance.value) {
             await client
