@@ -307,6 +307,14 @@ function fetchTx(tx: string) {
             }
         });
 }
+
+const onOpenPopup=()=>{
+    if(open.value){
+        error.value=''
+        msgBox.value={...msgBox.value, isValid:{ ok: false, error: ''} }
+        initData()
+    }
+}
 </script>
 <template>
     <div class="text-gray-600">
@@ -316,7 +324,7 @@ function fetchTx(tx: string) {
             type="checkbox"
             :id="type"
             class="modal-toggle"
-            @change="initData()"
+            @change="onOpenPopup()"
         />
         <label :for="type" class="modal cursor-pointer">
             <label
