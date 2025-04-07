@@ -102,12 +102,11 @@ const msgBox = ref({
     isValid: { ok: false, error: '' },
     initial: function () {},
 });
-const feeAmount = ref(2000);
+const feeAmount = ref(1000000000000000000);
 const feeDenom = ref('');
 const gasInfo = ref(200000);
 const memo = ref('');
-const chainId = ref('cosmoshub-4');
-// const chainId = ref('taproot-1');
+const chainId = ref('hippo-protocol-1');
 const broadcast = ref(BroadcastMode.SYNC);
 
 
@@ -120,7 +119,7 @@ async function initData() {
             memo.value = `did:hp:${base64ToHex(res.info.pub_key.key)}`;
         });
 
-        feeAmount.value = Number(p.value?.fees?.amount || 2000);
+        feeAmount.value = Number(1000000000000000000); // 1HP for default fee
         feeDenom.value = balance.value[0]?.denom;
 
         try {
