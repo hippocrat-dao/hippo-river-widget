@@ -119,7 +119,7 @@ async function initData() {
             memo.value = `did:hp:${base64ToHex(res.info.pub_key.key)}`;
         });
 
-        feeAmount.value = Number(1000000000000000000); // 1HP for default fee
+        feeAmount.value =  Number(p.value?.fees?.amount || 1000000000000000000); // 1HP for default fee
         feeDenom.value = balance.value[0]?.denom;
 
         try {
