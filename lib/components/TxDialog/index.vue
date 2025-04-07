@@ -311,7 +311,6 @@ function fetchTx(tx: string) {
 const onOpenPopup=()=>{
     if(open.value){
         error.value=''
-        msgBox.value={...msgBox.value, isValid:{ ok: false, error: ''} }
         initData()
     }
 }
