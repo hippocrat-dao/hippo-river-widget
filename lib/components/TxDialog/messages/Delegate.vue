@@ -1,5 +1,5 @@
 <script lang="ts" setup>
-import { ComputedRef, PropType, computed, onMounted, ref } from 'vue';
+import { ComputedRef, PropType, computed, onMounted, onUnmounted, ref } from 'vue';
 import {
     getActiveValidators,
     getInactiveValidators,
@@ -22,7 +22,7 @@ const validator = ref('');
 
 const activeValidators = ref([]);
 const inactiveValidators = ref([]);
-const stakingDenom = ref('');
+const stakingDenom = ref('ahp');
 const unbondingTime = ref('');
 const amount = ref('');
 const amountDenom = ref('hp');
@@ -125,7 +125,6 @@ function initial() {
         stakingDenom.value = x.params.bond_denom; // ahp
         unbondingTime.value = x.params.unbonding_time;
     });
-
     getActiveValidators(props.endpoint).then((x) => {
         activeValidators.value = x.validators;
         if (!params.value.validator_address) {
@@ -135,6 +134,10 @@ function initial() {
         }
     });
 }
+
+onMounted(()=>{
+    initial();
+})
 
 defineExpose({ msgs, isValid, initial });
 </script>

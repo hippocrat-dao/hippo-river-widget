@@ -42,6 +42,10 @@ function initial() {
     })
 }
 
+onMounted(() => {
+    initial()
+})
+
 defineExpose({ msgs, isValid, initial })
 </script>
 <template>

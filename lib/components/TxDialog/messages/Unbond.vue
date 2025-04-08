@@ -87,13 +87,16 @@ function initial() {
 }
 
 const available = computed(() => {
-    const convert = new TokenUnitConverter(props.metadata);
     const base = delegation.value?.balance || {amount: "", denom: ""}
     return {
         base,
         display: convert.baseToUnit(base, amountDenom.value),
     };
 });
+
+onMounted(() => {
+    initial()
+})
 
 defineExpose({msgs, isValid, initial})
 </script>
