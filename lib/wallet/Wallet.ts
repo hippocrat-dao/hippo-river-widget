@@ -67,7 +67,8 @@ export interface AbstractWallet {
     sign(transaction: Transaction): Promise<any>
 }
 
-export const DEFAULT_HDPATH = "m/44'/118/0'/0/0";
+export const DEFAULT_HDPATH = "m/44'/0/0'/0/0";
+export const DEFAULT_LEDGER_HDPATH = "m/44'/118'/0'/0/0";
 
 export function keyType(chainId: string) {
     switch (true) {
@@ -84,15 +85,16 @@ export function keyType(chainId: string) {
 
 export function readWallet(hdPath?: string) {
     return JSON.parse(
-        localStorage.getItem(hdPath || DEFAULT_HDPATH) || '{}'
+        localStorage.getItem(hdPath || DEFAULT_HDPATH) ||localStorage.getItem(DEFAULT_LEDGER_HDPATH) || '{}'
     ) as ConnectedWallet
 }
 export function writeWallet(connected: ConnectedWallet, hdPath?: string) {
-    localStorage.setItem(hdPath || DEFAULT_HDPATH, JSON.stringify(connected))
+    localStorage.setItem(hdPath || (connected.wallet===WalletName.Keplr ? DEFAULT_HDPATH:DEFAULT_LEDGER_HDPATH), JSON.stringify(connected))
 }
 
 export function removeWallet(hdPath?: string) {
     localStorage.removeItem(hdPath || DEFAULT_HDPATH);
+    localStorage.removeItem(hdPath || DEFAULT_LEDGER_HDPATH);
 }
 
 export function extractChainId(chainId: string) {
@@ -106,6 +108,8 @@ export function extractChainId(chainId: string) {
 
 export function createWallet(name: WalletName, arg: WalletArgument, registry?: Registry, chain?: IChain,): AbstractWallet {
     const reg = registry || new Registry(defaultRegistryTypes)
+    console.info(name)
+
     switch (name) {
         case WalletName.OKX:
             return new OKXWallet(arg, <IChain>chain, reg);
