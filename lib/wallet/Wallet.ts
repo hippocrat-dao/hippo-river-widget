@@ -68,7 +68,7 @@ export interface AbstractWallet {
 }
 
 export const DEFAULT_HDPATH = "m/44'/0/0'/0/0";
-export const DEFAULT_LEDGER_HDPATH = "m/44'/118'/0'/0/0";
+export const DEFAULT_LEDGER_HDPATH = "m/44'/118/0'/0/0";
 
 export function keyType(chainId: string) {
     switch (true) {
