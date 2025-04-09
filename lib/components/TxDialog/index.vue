@@ -214,8 +214,8 @@ async function sendTx() {
         };
         console.log('tx:', tx);
         const current = readWallet();
-        const wallet = current ? current.wallet : WalletName.Keplr;
-        
+        const wallet = current?.wallet ? current.wallet : WalletName.Keplr;
+        console.info('wallet:', current);
         const client = new UniClient(wallet, {
             chainId: chainId.value,
                    });
