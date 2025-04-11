@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { ref, computed } from 'vue';
+import { ref, computed, onMounted } from 'vue';
 import {
     WalletName,
     createWallet,
@@ -14,7 +14,6 @@ import { Icon } from '@iconify/vue';
 const props = defineProps({
     params: String,
     chainId: String,
-    hdPath: String,
     addrPrefix: String // address prefix
 });
 
@@ -47,9 +46,6 @@ const list = [
 
 if (props.params) {
     let paramsWallet = JSON.parse(props?.params || "{}")?.wallet;
-    // console.log(`props: `, props);
-    // // console.log(`props: `, params);
-    // debugger;
 
     if (paramsWallet && paramsWallet.length > 0) {
         for (let i = 0; i < paramsWallet.length; i++) {
@@ -69,20 +65,16 @@ if (props.params) {
     }
 }
 
-async function initData() {
-}
 
 const walletList = computed(() => {
-    // const l = list
     return list;
 });
 
-const hdPath=computed(()=>{
-    
-    return name.value===WalletName.Ledger?"m/44'/118/0'/0/0":"m/44'/0/0'/0/0"
+const hdPath = computed(() => {
+    return name.value === WalletName.Ledger ? "m/44'/118/0'/0/0" : "m/44'/0/0'/0/0"
 })
 
-const connected = ref(readWallet(hdPath.value) as ConnectedWallet);
+const connected = ref({} as ConnectedWallet);
 
 
 function selectWallet(wallet: WalletName) {
@@ -110,7 +102,7 @@ async function connect() {
                         cosmosAddress: first.address,
                         hdPath: hdPath.value
                     };
-                    writeWallet(connected.value,hdPath.value);
+                    writeWallet(connected.value, hdPath.value);
                     emit('connect', {
                         value: connected.value
                     });
@@ -163,16 +155,30 @@ const tipMsg = computed(() => {
 const customKeplr = computed(() => {
     return `${location.protocol}//${location.host}/wallet/keplr?chain=${props.chainId}`;
 });
+
+onMounted(() => {
+    // re-connect with localstorage
+    let wallet = readWallet()
+    if (wallet?.cosmosAddress) {
+        connected.value = wallet;
+        name.value = wallet.wallet; //set wallet type
+        emit('connect', {
+            value: connected.value
+        });
+    }
+})
+
+
 </script>
 <template>
     <div class="mb-4">
         <!-- modal btn -->
         <div v-if="connected.cosmosAddress" class="dropdown dropdown-hover ping-connect-dropdown">
             <label tabindex="0" class="btn btn-sm m-1 lowercase">{{ connected.wallet }}-{{
-            connected.cosmosAddress?.substring(
-                connected.cosmosAddress?.length - 4
-            )
-        }}</label>
+                connected.cosmosAddress?.substring(
+                    connected.cosmosAddress?.length - 4
+                )
+            }}</label>
             <div tabindex="0" class="dropdown-content menu shadow p-2 bg-base-100 rounded w-64 overflow-auto">
                 <div class="px-2 mb-1 text-gray-500 dark:text-gray-400 font-semibold flex justify-between">
                     <span class="text-lg"> {{ connected.wallet }} </span>
@@ -220,7 +226,7 @@ const customKeplr = computed(() => {
             class="btn btn-sm ping-connect-btn capitalize">Connect Wallet</label>
 
         <!-- modal content -->
-        <input v-model="open" type="checkbox" id="PingConnectWallet" class="modal-toggle" @change="initData()" />
+        <input v-model="open" type="checkbox" id="PingConnectWallet" class="modal-toggle" />
 
         <label for="PingConnectWallet" class="modal cursor-pointer z-[999999]">
             <label class="modal-box rounded-lg" for="">
