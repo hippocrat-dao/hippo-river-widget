@@ -9,9 +9,11 @@ import {
 import {
     AbstractWallet,
     Account,
+    DEFAULT_HDPATH,
     WalletArgument,
     WalletName,
     keyType,
+    writeWallet,
 } from '../Wallet';
 import { Transaction } from '../../utils/type';
 import { TxRaw } from 'cosmjs-types/cosmos/tx/v1beta1/tx';
