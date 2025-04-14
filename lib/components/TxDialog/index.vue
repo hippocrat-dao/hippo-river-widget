@@ -35,6 +35,7 @@ import ChainRegistryClient from '@ping-pub/chain-registry-client';
 import MigrateContract from './wasm/MigrateContract.vue';
 import UpdateAdmin from './wasm/UpdateAdmin.vue';
 import ClearAdmin from './wasm/ClearAdmin.vue';
+import { TokenUnitConverter } from '../../utils/TokenUnitConverter';
 
 const props = defineProps({
     type: String,
@@ -100,15 +101,39 @@ const error = ref('');
 const msgBox = ref({
     msgs: [],
     isValid: { ok: false, error: '' },
-    initial: function () {},
+    initial: function () { },
 });
-const feeAmount = ref(1000000000000000000);
-const feeDenom = ref('');
+const feeAmount = ref(1);
+const feeDenom = ref('hp');
 const gasInfo = ref(200000);
 const memo = ref('');
 const chainId = ref('hippo-protocol-1');
 const broadcast = ref(BroadcastMode.SYNC);
 
+const convert = new TokenUnitConverter(
+    // below can be simplied to props.metadata after we add hp in metadata
+    {
+        ahp: {
+            name: 'hp',
+            description: 'The native staking token of the Hippo Protocol.',
+            denom_units: [
+                {
+                    denom: 'ahp',
+                    exponent: 0,
+                    aliases: [],
+                },
+                {
+                    denom: 'hp',
+                    exponent: 18,
+                    aliases: [],
+                },
+            ],
+            base: 'ahp',
+            display: 'hp',
+            symbol: 'hp',
+        },
+    }
+);
 
 async function initData() {
     if (open.value && props.endpoint && props.sender) {
@@ -118,9 +143,9 @@ async function initData() {
         getAccountInfo(props.endpoint, props.sender).then((res) => {
             memo.value = `did:hp:${base64ToHex(res.info.pub_key.key)}`;
         });
-
-        feeAmount.value =  Number(p.value?.fees?.amount || 1000000000000000000); // 1HP for default fee
-        feeDenom.value = balance.value[0]?.denom;
+        const fee = convert.baseToUnit(p.value?.fees || { amount: '1', denom: 'hp' }, 'hp') // 1HP for default fee
+        feeAmount.value = Number(fee.amount);
+        feeDenom.value = fee.denom
 
         try {
             getBalance(props.endpoint, props.sender).then((x) => {
@@ -133,13 +158,13 @@ async function initData() {
                                 if (meta.metadata)
                                     metadatas.value[coin.denom] = meta.metadata;
                             })
-                            .catch(() => {});
+                            .catch(() => { });
                     if (coin.denom.startsWith('ibc/')) {
                         getIBCDenomMetadata(coin.denom)
                             .then((meta) => {
                                 if (meta) metadatas.value[coin.denom] = meta;
                             })
-                            .catch(() => {});
+                            .catch(() => { });
                     }
                 });
             });
@@ -170,15 +195,9 @@ async function initData() {
             // Every sub component should have a initial function
             if (msgBox.value && msgBox.value.initial) msgBox.value.initial();
 
-            // load fee denom
-            getStakingParam(props.endpoint).then((res) => {
-                feeDenom.value = res?.params?.bond_denom;
-            });
         } catch (err) {
             error.value = String(err);
         }
-
-        // account.value = await getAccount(props.endpoint, props.sender).then(x => x.account);
         sending.value = false;
     }
 }
@@ -202,7 +221,7 @@ async function sendTx() {
             fee: {
                 gas: '400000',
                 amount: [
-                    { amount: String(feeAmount.value), denom: feeDenom.value },
+                    convert.displayToBase('ahp', { amount: feeAmount.value.toString(), denom: feeDenom.value }),
                 ],
             },
             memo: memo.value,
@@ -218,7 +237,7 @@ async function sendTx() {
         console.info('wallet:', current);
         const client = new UniClient(wallet, {
             chainId: chainId.value,
-                   });
+        });
 
         if (!advance.value) {
             await client
@@ -228,8 +247,6 @@ async function sendTx() {
                     tx.fee.gas = (gas * 1.25).toFixed();
                 })
                 .catch(() => {
-                    // sending.value = false;
-                    // error.value = "Failed to simulate tx gas: " + err;
                     advance.value = true;
                 });
         } else {
@@ -308,9 +325,9 @@ function fetchTx(tx: string) {
         });
 }
 
-const onOpenPopup=()=>{
-    if(open.value){
-        error.value=''
+const onOpenPopup = () => {
+    if (open.value) {
+        error.value = ''
         initData()
     }
 }
@@ -318,26 +335,12 @@ const onOpenPopup=()=>{
 <template>
     <div class="text-gray-600">
         <!-- Put this part before </body> tag -->
-        <input
-            v-model="open"
-            type="checkbox"
-            :id="type"
-            class="modal-toggle"
-            @change="onOpenPopup()"
-        />
+        <input v-model="open" type="checkbox" :id="type" class="modal-toggle" @change="onOpenPopup()" />
         <label :for="type" class="modal cursor-pointer">
-            <label
-                class="modal-box relative p-5"
-                :class="{
-                    '!w-11/12 !max-w-5xl': String(type).startsWith('wasm'),
-                }"
-                for=""
-            >
-                <label
-                    :for="type"
-                    class="btn btn-sm btn-circle absolute right-4 top-4"
-                    >✕</label
-                >
+            <label class="modal-box relative p-5" :class="{
+                '!w-11/12 !max-w-5xl': String(type).startsWith('wasm'),
+            }" for="">
+                <label :for="type" class="btn btn-sm btn-circle absolute right-4 top-4">✕</label>
                 <h3 class="text-lg font-bold capitalize dark:text-gray-300">
                     {{ showTitle() }}
                 </h3>
@@ -348,39 +351,21 @@ const onOpenPopup=()=>{
 
                 <div v-if="sender">
                     <div v-if="view === 'input'">
-                        <component
-                            :is="msgType"
-                            ref="msgBox"
-                            :endpoint="endpoint"
-                            :sender="sender"
-                            :balances="balance"
-                            :metadata="metadatas"
-                            :params="props.params"
-                        />
+                        <component :is="msgType" ref="msgBox" :endpoint="endpoint" :sender="sender" :balances="balance"
+                            :metadata="metadatas" :params="props.params" />
                         <form class="space-y-6" action="#" method="POST">
                             <div :class="advance ? '' : 'hidden'">
                                 <div class="form-control">
                                     <label class="label">
                                         <span class="label-text">Fees</span>
                                     </label>
-                                    <label
-                                        class="input-group flex items-center"
-                                    >
-                                        <input
-                                            v-model="feeAmount"
-                                            type="text"
-                                            placeholder="0.001"
-                                            class="input border border-gray-300 dark:border-gray-600 flex-1 w-0 dark:text-gray-300"
-                                        />
-                                        <select
-                                            v-model="feeDenom"
-                                            class="select input border border-gray-300 dark:border-gray-600 w-[200px]"
-                                        >
-                                            <option disabled selected>
-                                                Select Fee Token
-                                            </option>
-                                            <option v-for="t in balance">
-                                                {{ t.denom }}
+                                    <label class="input-group flex items-center">
+                                        <input v-model="feeAmount" type="text" placeholder="0.001"
+                                            class="input border border-gray-300 dark:border-gray-600 flex-1 w-0 dark:text-gray-300" />
+                                        <select v-model="feeDenom"
+                                            class="select input border border-gray-300 dark:border-gray-600 w-[200px]">
+                                            <option selected>
+                                                hp
                                             </option>
                                         </select>
                                     </label>
@@ -389,34 +374,22 @@ const onOpenPopup=()=>{
                                     <label class="label">
                                         <span class="label-text">Gas</span>
                                     </label>
-                                    <input
-                                        v-model="gasInfo"
-                                        type="number"
-                                        placeholder="2000000"
-                                        class="input border border-gray-300 dark:border-gray-600 dark:text-gray-300"
-                                    />
+                                    <input v-model="gasInfo" type="number" placeholder="2000000"
+                                        class="input border border-gray-300 dark:border-gray-600 dark:text-gray-300" />
                                 </div>
                                 <div class="form-control">
                                     <label class="label">
                                         <span class="label-text">Memo</span>
                                     </label>
-                                    <input
-                                        v-model="memo"
-                                        type="text"
-                                        placeholder="Memo"
-                                        class="input border border-gray-300 dark:border-gray-600 dark:text-gray-300"
-                                    />
+                                    <input v-model="memo" type="text" placeholder="Memo"
+                                        class="input border border-gray-300 dark:border-gray-600 dark:text-gray-300" />
                                 </div>
                                 <div class="form-control">
                                     <label class="label">
-                                        <span class="label-text"
-                                            >Broadcast Mode</span
-                                        >
+                                        <span class="label-text">Broadcast Mode</span>
                                     </label>
-                                    <select
-                                        v-model="broadcast"
-                                        class="select input border border-gray-300 dark:border-gray-600 w-[200px]"
-                                    >
+                                    <select v-model="broadcast"
+                                        class="select input border border-gray-300 dark:border-gray-600 w-[200px]">
                                         <option :value="BroadcastMode.SYNC">
                                             Sync
                                         </option>
@@ -431,53 +404,25 @@ const onOpenPopup=()=>{
                             </div>
                         </form>
 
-                        <div
-                            v-show="error"
-                            class="mt-5 alert alert-error shadow-lg"
-                            @click="error = ''"
-                        >
+                        <div v-show="error" class="mt-5 alert alert-error shadow-lg" @click="error = ''">
                             <div class="flex">
-                                <svg
-                                    xmlns="http://www.w3.org/2000/svg"
-                                    class="stroke-current flex-shrink-0 h-6 w-6"
-                                    fill="none"
-                                    viewBox="0 0 24 24"
-                                >
-                                    <path
-                                        stroke-linecap="round"
-                                        stroke-linejoin="round"
-                                        stroke-width="2"
-                                        d="M10 14l2-2m0 0l2-2m-2 2l-2-2m2 2l2 2m7-2a9 9 0 11-18 0 9 9 0 0118 0z"
-                                    />
+                                <svg xmlns="http://www.w3.org/2000/svg" class="stroke-current flex-shrink-0 h-6 w-6"
+                                    fill="none" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                        d="M10 14l2-2m0 0l2-2m-2 2l-2-2m2 2l2 2m7-2a9 9 0 11-18 0 9 9 0 0118 0z" />
                                 </svg>
                                 <span>{{ error }}.</span>
                             </div>
                         </div>
 
-                        <div
-                            class="modal-action flex justify-between items-center"
-                        >
+                        <div class="modal-action flex justify-between items-center">
                             <div class="flex items-center cursor-pointer">
-                                <input
-                                    v-model="advance"
-                                    type="checkbox"
-                                    :id="`${type}-advance`"
-                                    class="checkbox checkbox-sm checkbox-primary mr-2"
-                                /><label
-                                    :for="`${type}-advance`"
-                                    class="cursor-pointer dark:text-gray-400"
-                                    >Advance</label
-                                >
+                                <input v-model="advance" type="checkbox" :id="`${type}-advance`"
+                                    class="checkbox checkbox-sm checkbox-primary mr-2" /><label :for="`${type}-advance`"
+                                    class="cursor-pointer dark:text-gray-400">Advance</label>
                             </div>
-                            <button
-                                class="btn btn-primary"
-                                @click="sendTx()"
-                                :disabled="sending"
-                            >
-                                <span
-                                    v-if="sending"
-                                    class="loading loading-spinner"
-                                ></span>
+                            <button class="btn btn-primary" @click="sendTx()" :disabled="sending">
+                                <span v-if="sending" class="loading loading-spinner"></span>
                                 Send
                             </button>
                         </div>
@@ -485,47 +430,32 @@ const onOpenPopup=()=>{
 
                     <div v-if="view === 'submitting'">
                         <div class="my-10">
-                            <div
-                                v-if="error"
-                                class="my-5 text-center text-red-500"
-                            >
+                            <div v-if="error" class="my-5 text-center text-red-500">
                                 {{ error }}
                             </div>
-                            <div
-                                v-else
-                                class="my-5 text-center text-lg text-green-500"
-                            >
+                            <div v-else class="my-5 text-center text-lg text-green-500">
                                 {{ msg }}
                             </div>
-                            <div
-                                class="overflow-hidden h-5 mb-2 text-xs flex rounded bg-green-100"
-                            >
-                                <div
-                                    :style="`width: ${step}%`"
-                                    class="shadow-none flex flex-col text-center whitespace-nowrap text-white justify-center bg-green-400"
-                                ></div>
+                            <div class="overflow-hidden h-5 mb-2 text-xs flex rounded bg-green-100">
+                                <div :style="`width: ${step}%`"
+                                    class="shadow-none flex flex-col text-center whitespace-nowrap text-white justify-center bg-green-400">
+                                </div>
                             </div>
                             <div class="flex items-center justify-between">
                                 <div>
                                     <span
-                                        class="text-xs font-semibold inline-block py-1 px-2 rounded text-gray-600 dark:text-white"
-                                    >
+                                        class="text-xs font-semibold inline-block py-1 px-2 rounded text-gray-600 dark:text-white">
                                         Submitted
                                     </span>
                                 </div>
                                 <div class="text-right">
-                                    <span
-                                        class="text-xs font-semibold inline-block text-gray-600 dark:text-white"
-                                    >
+                                    <span class="text-xs font-semibold inline-block text-gray-600 dark:text-white">
                                         {{ step }}%
                                     </span>
                                 </div>
                             </div>
                         </div>
-                        <label
-                            class="mt-10 flex justify-center text-sm"
-                            @click="viewTransaction"
-                        >
+                        <label class="mt-10 flex justify-center text-sm" @click="viewTransaction">
                             <span>View Transaction</span>
                         </label>
                     </div>

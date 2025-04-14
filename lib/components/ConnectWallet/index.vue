@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { ref, computed, onMounted } from 'vue';
+import { ref, computed, onMounted, onUnmounted } from 'vue';
 import {
     WalletName,
     createWallet,
@@ -106,6 +106,7 @@ async function connect() {
                     emit('connect', {
                         value: connected.value
                     });
+                    onConnect();
                 }
                 open.value = false;
             })
@@ -156,6 +157,38 @@ const customKeplr = computed(() => {
     return `${location.protocol}//${location.host}/wallet/keplr?chain=${props.chainId}`;
 });
 
+
+const handleAccountChange = async () => {
+    const wa = createWallet(name.value, {
+        chainId: props.chainId,
+        hdPath: hdPath.value,
+        prefix: props.addrPrefix
+    });
+    await wa
+        .getAccounts()
+        .then((accounts: Account[]) => {
+            if (accounts.length > 0) {
+                const [first] = accounts;
+                connected.value = {
+                    wallet: name.value,
+                    cosmosAddress: first.address,
+                    hdPath: hdPath.value
+                };
+                writeWallet(connected.value, hdPath.value);
+                emit('connect', {
+                    value: connected.value
+                });
+            }
+        })
+}
+
+const onConnect = () => {
+    if (connected.value.wallet === WalletName.Keplr) {
+        // handle Account change event
+        window.addEventListener('keplr_keystorechange', handleAccountChange);
+    }
+}
+
 onMounted(() => {
     // re-connect with localstorage
     let wallet = readWallet()
@@ -166,6 +199,11 @@ onMounted(() => {
             value: connected.value
         });
     }
+})
+
+onUnmounted(() => {
+    // remove event listener
+    window.removeEventListener('keplr_keystorechange', handleAccountChange);
 })
 
 
