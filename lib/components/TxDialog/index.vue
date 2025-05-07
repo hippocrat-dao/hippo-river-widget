@@ -141,6 +141,7 @@ async function initData() {
         view.value = 'input';
         p.value = JSON.parse(props.params || '{}');
         getAccountInfo(props.endpoint, props.sender).then((res) => {
+            if (!res.info?.pub_key) return;
             memo.value = `did:hp:${base64ToHex(res.info.pub_key.key)}`;
         });
         const fee = convert.baseToUnit(p.value?.fees || { amount: '1', denom: 'hp' }, 'hp') // 1HP for default fee
